@@ -72,6 +72,7 @@ class signalrClient {
             A: args,
             I: this._invocationId
         })
+
         ++this._invocationId
         if (this._websocket && this._websocket.readyState === this._websocket.OPEN) {
             this._websocket.send(payload, (err) => {
@@ -383,7 +384,7 @@ class hub {
      * Binding events receive messages
      */
     on(methodName, cb) {
-        const hubName = String(this._hubNames);
+        const hubName = this.client._hubNames;
         let handler = this.handlers[hubName.toLowerCase()]
         if (!handler) {
             handler = this.handlers[hubName.toLowerCase()] = {}
@@ -406,7 +407,7 @@ class hub {
      * Call the hub method and get return values asynchronously
      */
     call(methodName) {
-        const hubName = this._hubNames;
+        const hubName = this.client._hubNames;
         return new Promise((resolve, reject) => {
             let messages = this._processInvocationArgs(arguments)
             let invocationId = this.client._invocationId
@@ -427,7 +428,7 @@ class hub {
      * Invoke the hub method without return values
      */
     invoke(methodName) {
-        const hubName = this._hubNames;
+        const hubName = this.client._hubNames;
         let messages = this._processInvocationArgs(arguments)
         this.client._sendMessage(hubName, methodName, messages)
     }
