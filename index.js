@@ -88,8 +88,6 @@ class signalrClient {
                 ...this.qs
             })
 
-            console.log(url.parse(`${this.url}/negotiate?${query}`));
-
             let negotiateRequestOptions = url.parse(`${this.url}/negotiate?${query}`, true)
             negotiateRequestOptions.headers = this.headers
             negotiateRequestOptions.timeout = this.requestTimeout || 5000
