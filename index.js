@@ -10,20 +10,21 @@ const util = require('util')
 const events = require('events')
 
 /**
- * A signalR client for node.js which support ASP.net but not ASP.net Core. 
+ * A signalR client for node.js which support ASP.net but not ASP.net Core.
  * For ASP.net Core signalR support use the offical client from Microsoft.
  */
 class signalrClient {
   /**
-   * @param {String} url 
-   * @param {string[]} hubs 
+   * @param {String} url
+   * @param {string[]} hubs
    */
   constructor(url, hubs) {
     this.url = url
+    this.qs = {}
     this.headers = {}
     this.reconnectDelayTime = 5000
     this.requestTimeout = 5000
-    this.callTimeout = 5000  
+    this.callTimeout = 5000
     this.connection = {
       state: connectionState.disconnected,
       hub: new hub(this),
@@ -83,7 +84,8 @@ class signalrClient {
     return new Promise((resolve, reject) => {
       let query = querystring.stringify({
         connectionData: JSON.stringify(this._hubNames),
-        clientProtocol: 1.5
+        clientProtocol: 1.5,
+        ...this.qs
       })
       let negotiateRequestOptions = url.parse(`${this.url}/negotiate?${query}`, true)
       negotiateRequestOptions.headers = this.headers
@@ -133,7 +135,8 @@ class signalrClient {
       transport: "webSockets",
       connectionToken: this.connection.token,
       connectionData: JSON.stringify(this._hubNames),
-      tid: 10
+      tid: 10,
+      ...this.qs
     })
     let ws = new websocketClient(`${url}/connect?${query}`, {
       handshakeTimeout: this.requestTimeout,
@@ -228,7 +231,8 @@ class signalrClient {
         clientProtocol: 1.5,
         transport: "webSockets",
         connectionToken: this.connection.token,
-        connectionData: JSON.stringify(this._hubNames)
+        connectionData: JSON.stringify(this._hubNames),
+        ...this.qs
       })
       let startRequestOptions = url.parse(`${this.url}/start?${query}`, true)
       startRequestOptions.headers = this.headers
@@ -267,7 +271,8 @@ class signalrClient {
         clientProtocol: 1.5,
         transport: "webSockets",
         connectionToken: this.connection.token,
-        connectionData: JSON.stringify(this._hubNames)
+        connectionData: JSON.stringify(this._hubNames),
+        ...this.qs
       })
       let abortRequestOptions = url.parse(`${this.url}/abort?${query}`, true)
       abortRequestOptions.method = 'POST'
@@ -378,7 +383,7 @@ class hub {
   }
 
   /**
-   * Binding events receive messages 
+   * Binding events receive messages
    */
   on(hubName, methodName, cb) {
     let handler = this.handlers[hubName.toLowerCase()]
